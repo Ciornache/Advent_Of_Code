@@ -1,10 +1,13 @@
 #include <bits/stdc++.h>
+
 #define int long long
-#define MONKEYS 8
+#define SIZE 8
 #define FILES freopen("input.in","r",stdin);\
               freopen("output.out","w",stdout);
+#define mod 9699690 ///lcm of all the division numbers
 
 using namespace std;
+
 class Solution
 {
     struct Item
@@ -21,20 +24,22 @@ class Solution
     };
 
 public:
-    vector <Path> edges[MONKEYS];
-    Item * monkey[MONKEYS];
-    Item * roots[MONKEYS];
-    int inspected[MONKEYS];
+    vector <Path> edges[SIZE];
+    Item * monkey[SIZE];
+    Item * roots[SIZE];
+    int inspected[SIZE];
     Solution()
     {
-        for(int i = 0; i < MONKEYS; ++i)
+        for(int i = 0; i < SIZE; ++i)
         {
             monkey[i] = new Item;
             monkey[i]->worryLevel = monkey[i]->worryChange = 0;
             monkey[i]->nextItem = nullptr;
             roots[i] = monkey[i];
         }
+
         memset(inspected, false, sizeof(inspected));
+
         this->readInput();
     }
     void readInput()
@@ -46,11 +51,14 @@ public:
             vector<int> Items = this->getItems();
             for(auto i : Items)
             {
-                monkey[monkeyIndex]->worryLevel = i;
                 Item * currentItem = new Item;
+
+                monkey[monkeyIndex]->worryLevel = i;
                 monkey[monkeyIndex]->nextItem = currentItem;
+
                 currentItem->worryChange = currentItem->worryLevel = 0;
                 currentItem->nextItem = nullptr;
+
                 monkey[monkeyIndex] = monkey[monkeyIndex]->nextItem;
             }
             pair<char,int> operation = this->getOperation();
@@ -82,6 +90,7 @@ public:
     {
         string str;
         getline(cin, str);
+
         vector<int> Items;
         for(int i = 0; i < str.size(); ++i)
         {
@@ -109,9 +118,9 @@ public:
     }
     void completeRound(int task)
     {
-        for(int i = 0; i < MONKEYS; ++i)
+        for(int i = 0; i < SIZE; ++i)
         {
-//            for(int j = 0; j < MONKEYS; ++j)
+//            for(int j = 0; j < SIZE; ++j)
 //            {
 //                Item * root = roots[j];
 //                while(root->nextItem)
@@ -126,25 +135,30 @@ public:
             while(root->nextItem)
             {
                 inspected[i]++;
+
                 this->performOperation(root, task);
+
                 for(auto j : edges[i])
                 {
                     if((root->worryLevel % j.divisionTest && j.type == 0) || (root->worryLevel % j.divisionTest == 0 && j.type == 1))
                     {
                         Item * newItem = new Item;
+
                         monkey[j.monkey]->nextItem = newItem;
                         monkey[j.monkey]->worryLevel = root->worryLevel;
+
                         newItem->worryChange = monkey[j.monkey]->worryChange;
                         newItem->oper = monkey[j.monkey]->oper;
                         newItem->nextItem = nullptr;
+
                         monkey[j.monkey] = monkey[j.monkey]->nextItem;
 
                     }
                 }
                 root = root->nextItem;
             }
-            roots[i]->nextItem = nullptr;
-            roots[i]->worryLevel = 0;
+            roots[i]->nextItem = nullptr, roots[i]->worryLevel = 0;
+
             monkey[i] = roots[i];
         }
     }
@@ -155,36 +169,51 @@ public:
         if(i->worryChange == 0)
             opt = i->worryLevel;
         else opt = i->worryChange;
-        if(i->oper == '+')
-            i->worryLevel = i->worryLevel + opt;
-        else i->worryLevel = i->worryLevel * opt;
-        if(task == 1)
-            i->worryLevel /= 3;
-        else i->worryLevel %= 9699690;
+
+        switch(i->oper)
+        {
+        case '+' :
+            i->worryLevel + opt;
+        case '*':
+            i->worryLevel = i->worryLevel * opt;
+        }
+
+        switch(task)
+        {
+        case 1:
+            i->worryLevel = i->worryLevel / 3;
+        case 2:
+            i->worryLevel = i->worryLevel % mod;
+        }
     }
     void solveFirstTask()
     {
         for(int i = 1; i <= 20; ++i)
             this->completeRound(1);
-        sort(inspected, inspected + MONKEYS, greater<int>());
+
+        sort(inspected, inspected + SIZE, greater<int>());
         cout << inspected[0] * inspected[1] << '\n';
     }
     void solveSecondTask()
     {
         for(int i = 1; i <= 10000; ++i)
             this->completeRound(2);
-        sort(inspected, inspected + MONKEYS, greater<int>());
+
+        sort(inspected, inspected + SIZE, greater<int>());
         cout << inspected[0] * inspected[1] << '\n';
     }
 };
 
 signed main()
 {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0), cout.tie(0);
+
     FILES
     Solution solver;
-    #if 1
-        solver.solveFirstTask();
-    #else
-        solver.solveSecondTask();
-    #endif
+#if 1
+    solver.solveFirstTask();
+#else
+    solver.solveSecondTask();
+#endif
 }
