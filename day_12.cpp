@@ -1,10 +1,15 @@
-#include <bits/stdc++.h>
+#include <queue>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #define SIZE 205
 #define FILES freopen("input.in","r",stdin);\
               freopen("output.out","w",stdout);
 
 using namespace std;
+
 class Solution
 {
 
